@@ -1,0 +1,16 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle (optional) -->
+  <circle cx="100" cy="100" r="95" fill="#EFE4D2"/>
+  
+  <!-- Metronome base - simple trapezoid -->
+  <path d="M 50 170 L 150 170 L 140 185 L 60 185 Z" fill="#5C7658"/>
+  
+  <!-- Main metronome body - clean geometric triangle -->
+  <path d="M 70 170 L 100 30 L 130 170 Z" fill="#AEC8A4"/>
+  
+  <!-- Metronome pendulum arm -->
+  <line x1="100" y1="40" x2="135" y2="150" stroke="#BB5C4F" stroke-width="5" stroke-linecap="round"/>
+  
+  <!-- Pendulum weight -->
+  <circle cx="135" cy="150" r="8" fill="#BB5C4F"/>
+</svg>
