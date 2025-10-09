@@ -13,6 +13,7 @@ import { draggable, dropTargetForElements } from '@atlaskit/pragmatic-drag-and-d
 import { autoScrollForElements } from '@atlaskit/pragmatic-drag-and-drop-auto-scroll/element';
 import { DropIndicator } from '@atlaskit/pragmatic-drag-and-drop-react-drop-indicator/box';
 import { attachClosestEdge, type Edge, extractClosestEdge } from '@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge';
+import { analyticsEvents } from '../utils/analytics';
 
 
 interface SessionGeneratorProps {
@@ -138,11 +139,13 @@ const SessionGenerator: React.FC<SessionGeneratorProps> = ({ goals, onSessionCre
         });
 
         setActivities(generated);
+        analyticsEvents.sessionGenerated(sessionLength, generated.length);
       } catch (error) {
         console.error('LLM generation failed, using fallback:', error);
         // Fallback to rule-based generation
         const generated = generateSession(goals, repertoire, sessionLength);
         setActivities(generated);
+        analyticsEvents.sessionGenerated(sessionLength, generated.length);
       } finally {
         setIsGenerating(false);
         isGeneratingRef.current = false;
@@ -164,6 +167,8 @@ const SessionGenerator: React.FC<SessionGeneratorProps> = ({ goals, onSessionCre
     });
     // Clear cache when starting a session so next time generates fresh
     localStorage.removeItem(CACHE_KEY);
+    // Track session start
+    analyticsEvents.sessionStarted(sessionLength);
   };
 
   const handleAddExercise = () => {

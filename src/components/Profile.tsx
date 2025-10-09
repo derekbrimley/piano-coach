@@ -6,6 +6,7 @@ import { useEarTraining } from '../hooks/useEarTraining';
 import { useUserPreferences } from '../hooks/useUserPreferences';
 import { SCALES, INTERVALS, CHORDS, SCALE_SKILL_FIELDS } from '../data/skillsData';
 import type { RepertoirePiece } from '../types';
+import { analyticsEvents } from '../utils/analytics';
 
 type TabType = 'repertoire' | 'scales' | 'earTraining' | 'preferences';
 
@@ -80,6 +81,7 @@ const Profile: React.FC = () => {
   const handleScaleSkillChange = async (scaleKey: string, field: string, value: number) => {
     try {
       await updateScaleSkill(scaleKey, { [field]: value } as any);
+      analyticsEvents.scaleUpdated(scaleKey, field, value);
     } catch (error) {
       console.error('Error updating scale skill:', error);
     }

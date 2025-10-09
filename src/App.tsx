@@ -11,6 +11,7 @@ import PracticeTimer from './components/PracticeTimer';
 import ProgressLogger from './components/ProgressLogger';
 import Profile from './components/Profile';
 import type { Session, Goal } from './types';
+import { analyticsEvents } from './utils/analytics';
 
 type ViewType = 'dashboard' | 'goalSetup' | 'editGoal' | 'sessionGenerator' | 'customizer' | 'timer' | 'progressLogger' | 'profile';
 
@@ -33,7 +34,11 @@ function AppContent() {
   const handleDeleteGoal = async (goalId: string) => {
     if (window.confirm('Are you sure you want to delete this goal?')) {
       try {
+        const goal = goals.find(g => g.id === goalId);
         await deleteGoal(goalId);
+        if (goal) {
+          analyticsEvents.goalDeleted(goal.type);
+        }
       } catch (error) {
         console.error('Error deleting goal:', error);
       }

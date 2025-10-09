@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useGoals } from '../../hooks/useGoals';
 import type { NewPieceGoal, NewPieceFormData, LeadSheetProgress } from '../../types';
+import { analyticsEvents } from '../../utils/analytics';
 
 interface NewPieceFormProps {
   onSave: () => void;
@@ -38,6 +39,7 @@ const NewPieceForm: React.FC<NewPieceFormProps> = ({ onSave, onCancel, existingG
         await updateGoal(existingGoal.id, formData);
       } else {
         await addGoal(formData);
+        analyticsEvents.goalCreated('newPiece');
       }
       onSave();
     } catch (error) {

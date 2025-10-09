@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useRepertoire } from '../hooks/useRepertoire';
 import type { RepertoirePiece, ReviewFrequency } from '../types';
+import { analyticsEvents } from '../utils/analytics';
 
 const Repertoire: React.FC = () => {
   const { user } = useAuth();
@@ -19,6 +20,7 @@ const Repertoire: React.FC = () => {
         setEditingPiece(null);
       } else {
         await addPiece(formData);
+        analyticsEvents.pieceAdded(formData.frequency);
       }
       setFormData({ name: '', frequency: 'weekly' });
       setShowAddForm(false);

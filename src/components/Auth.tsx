@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { analyticsEvents } from '../utils/analytics';
 
 const Auth: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -17,8 +18,10 @@ const Auth: React.FC = () => {
     try {
       if (isLogin) {
         await login(email, password);
+        analyticsEvents.userSignedIn();
       } else {
         await signup(email, password);
+        analyticsEvents.userSignedUp();
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');

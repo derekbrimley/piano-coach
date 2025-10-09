@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "practice-coach-bb250"
-  }
+    "default": "practice-coach-bb250",
+    "dev": "piano-coach-dev"
+  },
+  "targets": {},
+  "etags": {}
 }

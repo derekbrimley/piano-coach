@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Session } from '../types';
+import { analyticsEvents } from '../utils/analytics';
 
 interface PracticeTimerProps {
   session: Session;
@@ -46,6 +47,11 @@ const PracticeTimer = ({ session, onComplete, onExit }: PracticeTimerProps) => {
 
   const handleNextActivity = () => {
     console.log(currentActivityIndex, totalActivities, session.activities[currentActivityIndex + 1].duration * 60)
+    // Track activity completion
+    if (currentActivity) {
+      analyticsEvents.activityCompleted(currentActivity.type, currentActivity.duration);
+    }
+
     if (currentActivityIndex < totalActivities - 1) {
       const nextIndex = currentActivityIndex + 1;
       setCurrentActivityIndex(nextIndex);
@@ -55,6 +61,9 @@ const PracticeTimer = ({ session, onComplete, onExit }: PracticeTimerProps) => {
       setIsPaused(false);
       handleStart();
     } else {
+      // Track session completion
+      const completedActivities = session.activities.length;
+      analyticsEvents.sessionCompleted(session.totalDuration, completedActivities);
       onComplete();
     }
   };

@@ -1,0 +1,83 @@
+name: Deploy to Firebase
+
+on:
+  push:
+    branches:
+      - main        # Deploy to production
+      - dev         # Deploy to development
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Functions dependencies
+        run: cd functions && npm ci
+
+      # Set environment variables based on branch
+      - name: Set Dev Environment Variables
+        if: github.ref == 'refs/heads/dev'
+        run: |
+          echo "VITE_CLOUD_FUNCTION_URL=${{ secrets.DEV_CLOUD_FUNCTION_URL }}" >> .env.production
+          echo "VITE_FIREBASE_API_KEY=${{ secrets.DEV_FIREBASE_API_KEY }}" >> .env.production
+          echo "VITE_FIREBASE_AUTH_DOMAIN=${{ secrets.DEV_FIREBASE_AUTH_DOMAIN }}" >> .env.production
+          echo "VITE_FIREBASE_PROJECT_ID=${{ secrets.DEV_FIREBASE_PROJECT_ID }}" >> .env.production
+          echo "VITE_FIREBASE_STORAGE_BUCKET=${{ secrets.DEV_FIREBASE_STORAGE_BUCKET }}" >> .env.production
+          echo "VITE_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.DEV_FIREBASE_MESSAGING_SENDER_ID }}" >> .env.production
+          echo "VITE_FIREBASE_APP_ID=${{ secrets.DEV_FIREBASE_APP_ID }}" >> .env.production
+          echo "VITE_FIREBASE_MEASUREMENT_ID=${{ secrets.DEV_FIREBASE_MEASUREMENT_ID }}" >> .env.production
+
+      - name: Set Production Environment Variables
+        if: github.ref == 'refs/heads/main'
+        run: |
+          echo "VITE_CLOUD_FUNCTION_URL=${{ secrets.PROD_CLOUD_FUNCTION_URL }}" >> .env.production
+          echo "VITE_FIREBASE_API_KEY=${{ secrets.PROD_FIREBASE_API_KEY }}" >> .env.production
+          echo "VITE_FIREBASE_AUTH_DOMAIN=${{ secrets.PROD_FIREBASE_AUTH_DOMAIN }}" >> .env.production
+          echo "VITE_FIREBASE_PROJECT_ID=${{ secrets.PROD_FIREBASE_PROJECT_ID }}" >> .env.production
+          echo "VITE_FIREBASE_STORAGE_BUCKET=${{ secrets.PROD_FIREBASE_STORAGE_BUCKET }}" >> .env.production
+          echo "VITE_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.PROD_FIREBASE_MESSAGING_SENDER_ID }}" >> .env.production
+          echo "VITE_FIREBASE_APP_ID=${{ secrets.PROD_FIREBASE_APP_ID }}" >> .env.production
+          echo "VITE_FIREBASE_MEASUREMENT_ID=${{ secrets.PROD_FIREBASE_MEASUREMENT_ID }}" >> .env.production
+
+      - name: Build
+        run: npm run build
+
+      # Deploy to Dev Firebase
+      - name: Deploy to Dev Firebase
+        if: github.ref == 'refs/heads/dev'
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        run: |
+          npm install -g firebase-tools
+          firebase use piano-coach-dev --token $FIREBASE_TOKEN
+          firebase functions:config:set \
+            anthropic.key="${{ secrets.ANTHROPIC_API_KEY }}" \
+            openai.key="${{ secrets.OPENAI_API_KEY }}" \
+            --token $FIREBASE_TOKEN
+          firebase deploy --only hosting,functions --token $FIREBASE_TOKEN
+
+      # Deploy to Production Firebase
+      - name: Deploy to Production Firebase
+        if: github.ref == 'refs/heads/main'
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        run: |
+          npm install -g firebase-tools
+          firebase use practice-coach-bb250 --token $FIREBASE_TOKEN
+          firebase functions:config:set \
+            anthropic.key="${{ secrets.ANTHROPIC_API_KEY }}" \
+            openai.key="${{ secrets.OPENAI_API_KEY }}" \
+            --token $FIREBASE_TOKEN
+          firebase deploy --only hosting,functions --token $FIREBASE_TOKEN

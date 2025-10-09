@@ -30,4 +30,5 @@ firestore-debug.log
 
 # Environment Variables
 .env.local
+.env.production
 functions/.env
