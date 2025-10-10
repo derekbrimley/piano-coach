@@ -24,11 +24,7 @@ function AppContent() {
   const location = useLocation();
 
   const handleNewSession = () => {
-    if (goals.length === 0) {
-      navigate('/goals');
-    } else {
       navigate('/session');
-    }
   };
 
   const handleDeleteGoal = async (goalId: string) => {
