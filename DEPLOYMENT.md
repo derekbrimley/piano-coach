@@ -53,23 +53,23 @@ Add the following secrets:
 
 #### Dev Environment (piano-coach-dev)
 - `DEV_CLOUD_FUNCTION_URL` = `https://us-central1-piano-coach-dev.cloudfunctions.net/generateSession`
-- `DEV_FIREBASE_API_KEY` = `AIzaSyC5WAE02TFBS2OLAl2YvCkpF1yKYvl8qcc`
+- `DEV_FIREBASE_API_KEY` = `your_dev_api_key_here` (get from Firebase Console → Project Settings → General → Web apps)
 - `DEV_FIREBASE_AUTH_DOMAIN` = `piano-coach-dev.firebaseapp.com`
 - `DEV_FIREBASE_PROJECT_ID` = `piano-coach-dev`
 - `DEV_FIREBASE_STORAGE_BUCKET` = `piano-coach-dev.firebasestorage.app`
-- `DEV_FIREBASE_MESSAGING_SENDER_ID` = `412036519347`
-- `DEV_FIREBASE_APP_ID` = `1:412036519347:web:30c8bf405dffd893b627c6`
-- `DEV_FIREBASE_MEASUREMENT_ID` = `G-PJN6DP3EDW`
+- `DEV_FIREBASE_MESSAGING_SENDER_ID` = `your_dev_messaging_sender_id`
+- `DEV_FIREBASE_APP_ID` = `your_dev_app_id`
+- `DEV_FIREBASE_MEASUREMENT_ID` = `your_dev_measurement_id`
 
 #### Production Environment (practice-coach-bb250)
 - `PROD_CLOUD_FUNCTION_URL` = `https://us-central1-practice-coach-bb250.cloudfunctions.net/generateSession`
-- `PROD_FIREBASE_API_KEY` = `AIzaSyC1KCoO7wzM0xmkhyPbxIwBW65g_kD8Vpg`
+- `PROD_FIREBASE_API_KEY` = `your_prod_api_key_here` (get from Firebase Console → Project Settings → General → Web apps)
 - `PROD_FIREBASE_AUTH_DOMAIN` = `practice-coach-bb250.firebaseapp.com`
 - `PROD_FIREBASE_PROJECT_ID` = `practice-coach-bb250`
 - `PROD_FIREBASE_STORAGE_BUCKET` = `practice-coach-bb250.firebasestorage.app`
-- `PROD_FIREBASE_MESSAGING_SENDER_ID` = `537270616019`
-- `PROD_FIREBASE_APP_ID` = `1:537270616019:web:bc5467bd6a904ebb1af926`
-- `PROD_FIREBASE_MEASUREMENT_ID` = `G-DWSR2EVZ3L`
+- `PROD_FIREBASE_MESSAGING_SENDER_ID` = `your_prod_messaging_sender_id`
+- `PROD_FIREBASE_APP_ID` = `your_prod_app_id`
+- `PROD_FIREBASE_MEASUREMENT_ID` = `your_prod_measurement_id`
 
 ### 4. Create Branches
 
