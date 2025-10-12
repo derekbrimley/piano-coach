@@ -66,6 +66,7 @@ const SessionGenerator: React.FC<SessionGeneratorProps> = ({ goals, onSessionCre
   const [closestEdge, setClosestEdge] = useState<{ index: number; edge: Edge } | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const isGeneratingRef = useRef(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Set up auto-scroll for dragging
@@ -97,6 +98,11 @@ const SessionGenerator: React.FC<SessionGeneratorProps> = ({ goals, onSessionCre
   useEffect(() => {
     // If session length changed, clear activities to trigger regeneration
     if (prevSessionLengthRef.current !== sessionLength) {
+      // Cancel any in-flight request
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
       setActivities([]);
       isGeneratingRef.current = false;
       prevSessionLengthRef.current = sessionLength;
@@ -115,6 +121,10 @@ const SessionGenerator: React.FC<SessionGeneratorProps> = ({ goals, onSessionCre
     }
 
     const generateWithLLM = async () => {
+      // Create a new AbortController for this request
+      const abortController = new AbortController();
+      abortControllerRef.current = abortController;
+
       isGeneratingRef.current = true;
       setIsGenerating(true);
       try {
@@ -132,23 +142,39 @@ const SessionGenerator: React.FC<SessionGeneratorProps> = ({ goals, onSessionCre
 
         const skillSummary = formatSkillSummaryForLLM(summary);
 
-        // Call LLM API (Claude or OpenAI)
+        // Call LLM API (Claude or OpenAI) with abort signal
         const generated = await generateSessionWithLLM({
           skillSummary,
-          sessionLength
+          sessionLength,
+          signal: abortController.signal
         });
 
-        setActivities(generated);
-        analyticsEvents.sessionGenerated(sessionLength, generated.length);
+        // Only update activities if this request wasn't aborted
+        if (!abortController.signal.aborted) {
+          setActivities(generated);
+          analyticsEvents.sessionGenerated(sessionLength, generated.length);
+        }
       } catch (error) {
+        // Don't handle errors if the request was aborted
+        if (error instanceof DOMException && error.name === 'AbortError') {
+          console.log('Session generation cancelled');
+          return;
+        }
+
         console.error('LLM generation failed, using fallback:', error);
-        // Fallback to rule-based generation
-        const generated = generateSession(goals, repertoire, sessionLength);
-        setActivities(generated);
-        analyticsEvents.sessionGenerated(sessionLength, generated.length);
+        // Only use fallback if not aborted
+        if (!abortController.signal.aborted) {
+          const generated = generateSession(goals, repertoire, sessionLength);
+          setActivities(generated);
+          analyticsEvents.sessionGenerated(sessionLength, generated.length);
+        }
       } finally {
-        setIsGenerating(false);
-        isGeneratingRef.current = false;
+        // Only reset state if this request wasn't aborted
+        if (!abortController.signal.aborted) {
+          setIsGenerating(false);
+          isGeneratingRef.current = false;
+          abortControllerRef.current = null;
+        }
       }
     };
 
