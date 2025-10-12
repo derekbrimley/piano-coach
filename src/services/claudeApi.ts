@@ -7,6 +7,7 @@ const CLOUD_FUNCTION_URL = import.meta.env.VITE_CLOUD_FUNCTION_URL ||
 export interface GenerateSessionParams {
   skillSummary: string;
   sessionLength: number;
+  signal?: AbortSignal;
 }
 
 // Main function that calls the Cloud Function
@@ -22,7 +23,8 @@ export const generateSessionWithLLM = async (
       body: JSON.stringify({
         skillSummary: params.skillSummary,
         sessionLength: params.sessionLength
-      })
+      }),
+      signal: params.signal
     });
 
     if (!response.ok) {
@@ -33,6 +35,10 @@ export const generateSessionWithLLM = async (
     const data = await response.json();
     return data.activities;
   } catch (error) {
+    // Don't log abort errors - they're expected when user changes session length
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      throw error;
+    }
     console.error('Error calling Cloud Function:', error);
     throw error;
   }
