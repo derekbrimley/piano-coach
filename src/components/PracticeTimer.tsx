@@ -46,7 +46,6 @@ const PracticeTimer = ({ session, onComplete, onExit }: PracticeTimerProps) => {
   }, [isRunning, isPaused, timeRemaining]);
 
   const handleNextActivity = () => {
-    console.log(currentActivityIndex, totalActivities, session.activities[currentActivityIndex + 1].duration * 60)
     // Track activity completion
     if (currentActivity) {
       analyticsEvents.activityCompleted(currentActivity.type, currentActivity.duration);
