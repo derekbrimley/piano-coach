@@ -57,7 +57,7 @@ const SessionGenerator: React.FC<SessionGeneratorProps> = ({ goals, onSessionCre
 
   const cachedSession = loadCachedSession();
   const [sessionLength, setSessionLength] = useState(
-    cachedSession?.sessionLength || preferences?.defaultSessionLength || 60
+    preferences?.defaultSessionLength || cachedSession?.sessionLength || 60
   );
   const [activities, setActivities] = useState<Activity[]>(cachedSession?.activities || []);
   const [showExerciseSelector, setShowExerciseSelector] = useState(false);
@@ -67,6 +67,13 @@ const SessionGenerator: React.FC<SessionGeneratorProps> = ({ goals, onSessionCre
   const [isGenerating, setIsGenerating] = useState(false);
   const isGeneratingRef = useRef(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Update session length when preferences change
+  useEffect(() => {
+    if (preferences?.defaultSessionLength && sessionLength !== preferences.defaultSessionLength) {
+      setSessionLength(preferences.defaultSessionLength);
+    }
+  }, [preferences?.defaultSessionLength]);
 
   // Set up auto-scroll for dragging
   useEffect(() => {

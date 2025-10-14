@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { CssVarsProvider } from '@mui/joy/styles';
+import CssBaseline from '@mui/joy/CssBaseline';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { useGoals } from './hooks/useGoals';
 import Auth from './components/Auth';
@@ -131,7 +133,7 @@ function AppContent() {
   const currentView = pathToView[location.pathname] || 'dashboard';
 
   return (
-    <div className="h-screen bg-gray-50 flex overflow-hidden">
+    <div className="h-screen flex flex-col overflow-hidden">
       {showNavigation && (
         <Navigation
           currentView={currentView}
@@ -200,11 +202,14 @@ function AppContent() {
 
 function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <AppContent />
-      </BrowserRouter>
-    </AuthProvider>
+    <CssVarsProvider>
+      <CssBaseline />
+      <AuthProvider>
+        <BrowserRouter>
+          <AppContent />
+        </BrowserRouter>
+      </AuthProvider>
+    </CssVarsProvider>
   );
 }
 

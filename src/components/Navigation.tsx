@@ -1,3 +1,14 @@
+import Box from '@mui/joy/Box';
+import Tabs from '@mui/joy/Tabs';
+import TabList from '@mui/joy/TabList';
+import Tab from '@mui/joy/Tab';
+import Typography from '@mui/joy/Typography';
+import IconButton from '@mui/joy/IconButton';
+import Menu from '@mui/joy/Menu';
+import MenuItem from '@mui/joy/MenuItem';
+import Dropdown from '@mui/joy/Dropdown';
+import MenuButton from '@mui/joy/MenuButton';
+
 interface NavigationProps {
   currentView: string;
   onNavigate: (view: any) => void;
@@ -12,38 +23,77 @@ const Navigation: React.FC<NavigationProps> = ({ currentView, onNavigate, onLogo
     { id: 'profile', label: 'Profile', icon: '👤' }
   ];
 
+  const handleTabChange = (_event: React.SyntheticEvent | null, newValue: string | number | null) => {
+    if (newValue) {
+      onNavigate(newValue as string);
+    }
+  };
+
   return (
-    <div className="w-64 bg-white border-r border-gray-200 h-screen flex flex-col">
-      <div className="p-6">
-        <h2 className="text-xl font-bold text-gray-800">Piano Coach</h2>
-      </div>
+    <Box
+      sx={{
+        borderBottom: 1,
+        borderColor: 'divider',
+        bgcolor: 'background.surface',
+        px: { xs: 1, sm: 2 },
+        py: 1,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 2
+      }}
+    >
+      <Typography
+        level="h4"
+        sx={{
+          display: { xs: 'none', sm: 'block' },
+          fontWeight: 'bold'
+        }}
+      >
+        🎹 Piano Coach
+      </Typography>
 
-      <nav className="flex-1 px-3">
-        {navItems.map((item) => (
-          <button
-            key={item.id}
-            onClick={() => onNavigate(item.id)}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition ${
-              currentView === item.id
-                ? 'bg-blue-500 text-white'
-                : 'text-gray-700 hover:bg-gray-100'
-            }`}
-          >
-            <span className="text-xl">{item.icon}</span>
-            <span className="font-medium">{item.label}</span>
-          </button>
-        ))}
-      </nav>
-
-      <div className="p-4 border-t border-gray-200">
-        <button
-          onClick={onLogout}
-          className="w-full px-4 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg"
+      <Tabs
+        value={currentView}
+        onChange={handleTabChange}
+        sx={{ flex: 1, maxWidth: { xs: '100%', sm: 600 } }}
+      >
+        <TabList
+          sx={{
+            overflow: 'auto',
+            scrollSnapType: 'x mandatory',
+            '&::-webkit-scrollbar': { display: 'none' },
+          }}
         >
-          Sign Out
-        </button>
-      </div>
-    </div>
+          {navItems.map((item) => (
+            <Tab
+              key={item.id}
+              value={item.id}
+              sx={{ flex: { xs: 1, sm: 'auto' }, minWidth: { xs: 80, sm: 100 } }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <span>{item.icon}</span>
+                <Typography level="body-sm" sx={{ display: { xs: 'none', sm: 'inline' } }}>
+                  {item.label}
+                </Typography>
+              </Box>
+            </Tab>
+          ))}
+        </TabList>
+      </Tabs>
+
+      <Dropdown>
+        <MenuButton
+          slots={{ root: IconButton }}
+          slotProps={{ root: { variant: 'outlined', color: 'neutral' } }}
+        >
+          ⚙️
+        </MenuButton>
+        <Menu placement="bottom-end">
+          <MenuItem onClick={onLogout}>Sign Out</MenuItem>
+        </Menu>
+      </Dropdown>
+    </Box>
   );
 };
 
