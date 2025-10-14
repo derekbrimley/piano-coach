@@ -1,5 +1,13 @@
 import { useAuth } from '../contexts/AuthContext';
 import { useSessions } from '../hooks/useSessions';
+import Box from '@mui/joy/Box';
+import Typography from '@mui/joy/Typography';
+import Card from '@mui/joy/Card';
+import CardContent from '@mui/joy/CardContent';
+import Button from '@mui/joy/Button';
+import CircularProgress from '@mui/joy/CircularProgress';
+import Stack from '@mui/joy/Stack';
+import Chip from '@mui/joy/Chip';
 
 interface DashboardProps {
   numGoals: number;
@@ -12,7 +20,7 @@ const Dashboard: React.FC<DashboardProps> = ({ numGoals, onNewSession, onManageG
 
   const { sessions, loading: sessionsLoading } = useSessions(user?.uid);
 
-  
+
 
   const totalSessions = sessions.length;
   const totalPracticeTime = sessions.reduce((sum, session) => sum + (session.totalDuration || 0), 0);
@@ -20,102 +28,147 @@ const Dashboard: React.FC<DashboardProps> = ({ numGoals, onNewSession, onManageG
 
   if (sessionsLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-xl text-gray-600">Loading...</div>
-      </div>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '50vh' }}>
+        <CircularProgress size="lg" />
+      </Box>
     );
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2">Piano Practice Coach</h1>
-        <p className="text-gray-600">Track your practice and achieve your musical goals</p>
-      </div>
+    <Box sx={{ maxWidth: 1200, mx: 'auto', p: { xs: 2, sm: 3, md: 4 } }}>
+      <Box sx={{ mb: 4 }}>
+        <Typography level="h1" sx={{ mb: 1 }}>Piano Practice Coach</Typography>
+        <Typography level="body-md" sx={{ color: 'text.secondary' }}>
+          Track your practice and achieve your musical goals
+        </Typography>
+      </Box>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-        <button
+      <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }} sx={{ mb: 4 }}>
+        <Card
+          variant="outlined"
+          sx={{
+            flex: 1,
+            cursor: 'pointer',
+            transition: 'all 0.2s',
+            '&:hover': { borderColor: 'primary.500', boxShadow: 'md' }
+          }}
           onClick={onNewSession}
-          className="p-6 bg-white border-2 border-gray-300 rounded-xl hover:border-blue-500 transition text-left"
         >
-          <h3 className="text-2xl font-bold mb-2">Start Practice Session</h3>
-          <p className="text-gray-600">Generate a personalized practice plan</p>
-        </button>
+          <CardContent>
+            <Typography level="h3" sx={{ mb: 1 }}>Start Practice Session</Typography>
+            <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
+              Generate a personalized practice plan
+            </Typography>
+          </CardContent>
+        </Card>
 
-        <button
+        <Card
+          variant="outlined"
+          sx={{
+            flex: 1,
+            cursor: 'pointer',
+            transition: 'all 0.2s',
+            '&:hover': { borderColor: 'primary.500', boxShadow: 'md' }
+          }}
           onClick={onManageGoals}
-          className="p-6 bg-white border-2 border-gray-300 rounded-xl hover:border-blue-500 transition text-left"
         >
-          <h3 className="text-2xl font-bold mb-2">Manage Goals</h3>
-          <p className="text-gray-600">Add or update your practice goals</p>
-        </button>
-      </div>
+          <CardContent>
+            <Typography level="h3" sx={{ mb: 1 }}>Manage Goals</Typography>
+            <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
+              Add or update your practice goals
+            </Typography>
+          </CardContent>
+        </Card>
+      </Stack>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-        <div className="p-6 bg-white rounded-xl border border-gray-200">
-          <p className="text-sm text-gray-600 mb-1">Total Sessions</p>
-          <p className="text-3xl font-bold text-blue-500">{totalSessions}</p>
-        </div>
+      <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }} sx={{ mb: 4 }}>
+        <Card variant="soft" sx={{ flex: 1 }}>
+          <CardContent>
+            <Typography level="body-sm" sx={{ color: 'text.secondary', mb: 0.5 }}>
+              Total Sessions
+            </Typography>
+            <Typography level="h2" sx={{ color: 'primary.500' }}>
+              {totalSessions}
+            </Typography>
+          </CardContent>
+        </Card>
 
-        <div className="p-6 bg-white rounded-xl border border-gray-200">
-          <p className="text-sm text-gray-600 mb-1">Total Practice Time</p>
-          <p className="text-3xl font-bold text-blue-500">{totalPracticeTime} min</p>
-        </div>
+        <Card variant="soft" sx={{ flex: 1 }}>
+          <CardContent>
+            <Typography level="body-sm" sx={{ color: 'text.secondary', mb: 0.5 }}>
+              Total Practice Time
+            </Typography>
+            <Typography level="h2" sx={{ color: 'primary.500' }}>
+              {totalPracticeTime} min
+            </Typography>
+          </CardContent>
+        </Card>
 
-        <div className="p-6 bg-white rounded-xl border border-gray-200">
-          <p className="text-sm text-gray-600 mb-1">Active Goals</p>
-          <p className="text-3xl font-bold text-blue-500">{numGoals}</p>
-        </div>
-      </div>
+        <Card variant="soft" sx={{ flex: 1 }}>
+          <CardContent>
+            <Typography level="body-sm" sx={{ color: 'text.secondary', mb: 0.5 }}>
+              Active Goals
+            </Typography>
+            <Typography level="h2" sx={{ color: 'primary.500' }}>
+              {numGoals}
+            </Typography>
+          </CardContent>
+        </Card>
+      </Stack>
 
-      
+
 
       {/* Recent Sessions */}
       {recentSessions.length > 0 && (
-        <div>
-          <h2 className="text-2xl font-bold mb-4">Recent Sessions</h2>
-          <div className="space-y-3">
+        <Box sx={{ mb: 4 }}>
+          <Typography level="h2" sx={{ mb: 2 }}>Recent Sessions</Typography>
+          <Stack spacing={2}>
             {recentSessions.map((session) => (
-              <div key={session.id} className="p-4 bg-white rounded-lg border border-gray-200">
-                <div className="flex justify-between items-start mb-2">
-                  <div>
-                    <p className="font-semibold">
-                      {new Date(session.date).toLocaleDateString()} at{' '}
-                      {new Date(session.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </p>
-                    <p className="text-sm text-gray-600">{session.totalDuration} minutes</p>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-sm text-gray-600">
+              <Card key={session.id} variant="outlined">
+                <CardContent>
+                  <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" spacing={2}>
+                    <Box>
+                      <Typography level="title-md">
+                        {new Date(session.date).toLocaleDateString()} at{' '}
+                        {new Date(session.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </Typography>
+                      <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
+                        {session.totalDuration} minutes
+                      </Typography>
+                    </Box>
+                    <Chip size="sm" variant="soft" color="primary">
                       {session.activities?.filter(a => a.achieved).length || 0} /{' '}
                       {session.activities?.length || 0} completed
-                    </span>
-                  </div>
-                </div>
-                {session.notes && (
-                  <p className="text-sm text-gray-600 mt-2 italic">"{session.notes}"</p>
-                )}
-              </div>
+                    </Chip>
+                  </Stack>
+                  {session.notes && (
+                    <Typography level="body-sm" sx={{ mt: 2, fontStyle: 'italic', color: 'text.secondary' }}>
+                      "{session.notes}"
+                    </Typography>
+                  )}
+                </CardContent>
+              </Card>
             ))}
-          </div>
-        </div>
+          </Stack>
+        </Box>
       )}
 
       {numGoals === 0 && (
-        <div className="text-center py-12 bg-gray-50 rounded-xl">
-          <h3 className="text-xl font-semibold mb-2">Get Started</h3>
-          <p className="text-gray-600 mb-4">Set up your first practice goal to begin</p>
-          <button
-            onClick={onManageGoals}
-            className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-          >
-            Add Your First Goal
-          </button>
-        </div>
+        <Card variant="soft" sx={{ textAlign: 'center', py: 6 }}>
+          <CardContent>
+            <Typography level="h3" sx={{ mb: 1 }}>Get Started</Typography>
+            <Typography level="body-md" sx={{ color: 'text.secondary', mb: 3 }}>
+              Set up your first practice goal to begin
+            </Typography>
+            <Button size="lg" onClick={onManageGoals}>
+              Add Your First Goal
+            </Button>
+          </CardContent>
+        </Card>
       )}
-    </div>
+    </Box>
   );
 };
 
