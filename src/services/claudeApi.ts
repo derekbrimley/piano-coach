@@ -2,7 +2,7 @@ import type { Activity } from '../types';
 
 // Firebase Cloud Function endpoint
 const CLOUD_FUNCTION_URL = import.meta.env.VITE_CLOUD_FUNCTION_URL ||
-  'http://localhost:5001/practice-coach-bb250/us-central1/generateSession';
+  'http://localhost:5001/piano-coach-dev/us-central1/generateSession';
 
 export interface GenerateSessionParams {
   skillSummary: string;
@@ -14,6 +14,7 @@ export const generateSessionWithLLM = async (
   params: GenerateSessionParams
 ): Promise<Activity[]> => {
   try {
+    console.log('Cloud Function URL:', CLOUD_FUNCTION_URL);
     const response = await fetch(CLOUD_FUNCTION_URL, {
       method: 'POST',
       headers: {

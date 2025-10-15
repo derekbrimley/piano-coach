@@ -4,6 +4,7 @@ import { CssVarsProvider } from '@mui/joy/styles';
 import CssBaseline from '@mui/joy/CssBaseline';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { useGoals } from './hooks/useGoals';
+import { usePracticeGoal } from './hooks/usePracticeGoal';
 import Auth from './components/Auth';
 import Navigation from './components/Navigation';
 import Dashboard from './components/Dashboard';
@@ -20,6 +21,7 @@ type ViewType = 'dashboard' | 'goalSetup' | 'editGoal' | 'sessionGenerator' | 'c
 function AppContent() {
   const { user, logout } = useAuth();
   const { goals, loading, deleteGoal } = useGoals(user?.uid);
+  const { practiceGoals, loading: practiceGoalsLoading } = usePracticeGoal(user?.uid);
   const [currentSession, setCurrentSession] = useState<Session | null>(null);
   const [editGoal, setEditGoal] = useState<Goal | null>(null);
   const navigate = useNavigate();
@@ -86,7 +88,7 @@ function AppContent() {
 
   const handleGoalComplete = () => {
     setEditGoal(null);
-    navigate('/');
+    navigate('/goals');
   };
 
   const handleEditGoal = (goal: Goal) => {
@@ -109,7 +111,7 @@ function AppContent() {
     return <Auth />;
   }
 
-  if (loading) {
+  if (loading || practiceGoalsLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="text-xl text-gray-600">Loading...</div>
@@ -146,7 +148,7 @@ function AppContent() {
         <Routes>
           <Route path="/" element={
             <Dashboard
-              numGoals={goals.length}
+              numGoals={practiceGoals.length}
               onNewSession={handleNewSession}
               onManageGoals={() => navigate('/goals')}
             />

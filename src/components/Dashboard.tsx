@@ -20,8 +20,6 @@ const Dashboard: React.FC<DashboardProps> = ({ numGoals, onNewSession, onManageG
 
   const { sessions, loading: sessionsLoading } = useSessions(user?.uid);
 
-
-
   const totalSessions = sessions.length;
   const totalPracticeTime = sessions.reduce((sum, session) => sum + (session.totalDuration || 0), 0);
   const recentSessions = sessions.slice(0, 5);
@@ -76,7 +74,7 @@ const Dashboard: React.FC<DashboardProps> = ({ numGoals, onNewSession, onManageG
           <CardContent>
             <Typography level="h3" sx={{ mb: 1 }}>Manage Goals</Typography>
             <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
-              Add or update your practice goals
+              Set up to 3 practice goals
             </Typography>
           </CardContent>
         </Card>
@@ -160,10 +158,10 @@ const Dashboard: React.FC<DashboardProps> = ({ numGoals, onNewSession, onManageG
           <CardContent>
             <Typography level="h3" sx={{ mb: 1 }}>Get Started</Typography>
             <Typography level="body-md" sx={{ color: 'text.secondary', mb: 3 }}>
-              Set up your first practice goal to begin
+              Set a practice goal to get personalized AI-powered sessions
             </Typography>
             <Button size="lg" onClick={onManageGoals}>
-              Add Your First Goal
+              Set Your First Goal
             </Button>
           </CardContent>
         </Card>
