@@ -7,6 +7,8 @@ import { useRepertoire } from '../hooks/useRepertoire';
 import { useScaleSkills } from '../hooks/useScaleSkills';
 import { useEarTraining } from '../hooks/useEarTraining';
 import { useUserPreferences } from '../hooks/useUserPreferences';
+import { usePracticeGoal } from '../hooks/usePracticeGoal';
+import SessionStartMessage from './SessionStartMessage';
 import ExerciseSelector from './ExerciseSelector';
 import type { Activity, Exercise, Goal, Session, NewPieceGoal } from '../types';
 import { draggable, dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
@@ -37,6 +39,7 @@ const SessionGenerator: React.FC<SessionGeneratorProps> = ({ goals, onSessionCre
   const { scaleSkills } = useScaleSkills(user?.uid);
   const { earTraining } = useEarTraining(user?.uid);
   const { preferences } = useUserPreferences(user?.uid);
+  const { practiceGoals } = usePracticeGoal(user?.uid);
 
   // Try to load cached session on mount
   const loadCachedSession = (): CachedSession | null => {
@@ -138,13 +141,14 @@ const SessionGenerator: React.FC<SessionGeneratorProps> = ({ goals, onSessionCre
         // Filter only newPiece goals
         const newPieceGoals = goals.filter(g => g.type === 'newPiece') as NewPieceGoal[];
 
-        // Generate skill summary
+        // Generate skill summary with practice goals (use first active goal for now)
         const summary = generateUserSkillSummary(
           preferences?.practiceFocus || 'newPieces',
           newPieceGoals,
           repertoire,
           scaleSkills,
-          earTraining
+          earTraining,
+          practiceGoals[0] || null
         );
 
         const skillSummary = formatSkillSummaryForLLM(summary);
@@ -269,9 +273,10 @@ const SessionGenerator: React.FC<SessionGeneratorProps> = ({ goals, onSessionCre
         <p className="text-gray-600">Review and customize your session</p>
       </div>
 
+      {/* Show goal message */}
+      <SessionStartMessage />
 
 
-      
 
       {/* Activities List */}
       <div
