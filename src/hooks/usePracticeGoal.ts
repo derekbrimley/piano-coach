@@ -26,6 +26,29 @@ interface UsePracticeGoalReturn {
 
 const MAX_ACTIVE_GOALS = 3;
 
+// Helper function to recursively remove undefined values from objects
+const removeUndefined = (obj: any): any => {
+  if (obj === null || obj === undefined) {
+    return null;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(removeUndefined);
+  }
+
+  if (typeof obj === 'object') {
+    const cleaned: any = {};
+    for (const key in obj) {
+      if (obj[key] !== undefined) {
+        cleaned[key] = removeUndefined(obj[key]);
+      }
+    }
+    return cleaned;
+  }
+
+  return obj;
+};
+
 export const usePracticeGoal = (userId: string | undefined): UsePracticeGoalReturn => {
   const [practiceGoals, setPracticeGoals] = useState<PracticeGoal[]>([]); // Changed from single to array
   const [allGoals, setAllGoals] = useState<PracticeGoal[]>([]);
@@ -92,6 +115,7 @@ export const usePracticeGoal = (userId: string | undefined): UsePracticeGoalRetu
       // Filter out undefined values (Firestore doesn't allow them)
       const cleanData: any = {
         goalType: goalData.goalType,
+        title: goalData.title || 'Untitled Goal',
         startDate: goalData.startDate,
         endDate: goalData.endDate,
         userId,
@@ -100,9 +124,14 @@ export const usePracticeGoal = (userId: string | undefined): UsePracticeGoalRetu
         updatedAt: now
       };
 
-      // Only add specificDetails if it has a value
+      // Only add optional fields if they have values
       if (goalData.specificDetails) {
         cleanData.specificDetails = goalData.specificDetails;
+      }
+
+      // Add goalData if present (goal-specific tracking data)
+      if (goalData.goalData) {
+        cleanData.goalData = removeUndefined(goalData.goalData);
       }
 
       // Create the new goal
@@ -128,11 +157,15 @@ export const usePracticeGoal = (userId: string | undefined): UsePracticeGoalRetu
 
       // Only add fields that have values
       if (updates.goalType !== undefined) cleanUpdates.goalType = updates.goalType;
+      if (updates.title !== undefined) cleanUpdates.title = updates.title;
       if (updates.startDate !== undefined) cleanUpdates.startDate = updates.startDate;
       if (updates.endDate !== undefined) cleanUpdates.endDate = updates.endDate;
       if (updates.status !== undefined) cleanUpdates.status = updates.status;
       if (updates.specificDetails !== undefined && updates.specificDetails !== '') {
         cleanUpdates.specificDetails = updates.specificDetails;
+      }
+      if (updates.goalData !== undefined) {
+        cleanUpdates.goalData = removeUndefined(updates.goalData);
       }
 
       await updateDoc(goalRef, cleanUpdates);

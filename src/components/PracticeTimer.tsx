@@ -194,7 +194,7 @@ const PracticeTimer = ({ session, onComplete, onExit }: PracticeTimerProps) => {
                   onClick={handleSkip}
                   className="px-8 py-4 bg-gray-500 text-white rounded-full text-xl font-semibold hover:bg-gray-600 transition"
                 >
-                  Skip
+                  Complete
                 </button>
               </>
             )}

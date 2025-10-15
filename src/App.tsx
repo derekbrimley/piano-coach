@@ -3,57 +3,36 @@ import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-ro
 import { CssVarsProvider } from '@mui/joy/styles';
 import CssBaseline from '@mui/joy/CssBaseline';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { useGoals } from './hooks/useGoals';
 import { usePracticeGoal } from './hooks/usePracticeGoal';
 import Auth from './components/Auth';
 import Navigation from './components/Navigation';
 import Dashboard from './components/Dashboard';
-import GoalSetup from './components/GoalSetup';
+import EnhancedGoalSetup from './components/EnhancedGoalSetup';
 import SessionGenerator from './components/SessionGenerator';
 import PracticeTimer from './components/PracticeTimer';
 import ProgressLogger from './components/ProgressLogger';
 import Profile from './components/Profile';
-import type { Session, Goal } from './types';
-import { analyticsEvents } from './utils/analytics';
+import type { Session } from './types';
 
-type ViewType = 'dashboard' | 'goalSetup' | 'editGoal' | 'sessionGenerator' | 'customizer' | 'timer' | 'progressLogger' | 'profile';
+type ViewType = 'dashboard' | 'goalSetup' | 'sessionGenerator' | 'timer' | 'progressLogger' | 'profile';
 
 function AppContent() {
   const { user, logout } = useAuth();
-  const { goals, loading, deleteGoal } = useGoals(user?.uid);
-  const { practiceGoals, loading: practiceGoalsLoading } = usePracticeGoal(user?.uid);
+  const { practiceGoals, loading } = usePracticeGoal(user?.uid);
   const [currentSession, setCurrentSession] = useState<Session | null>(null);
-  const [editGoal, setEditGoal] = useState<Goal | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
 
   const handleNewSession = () => {
-      navigate('/session');
-  };
-
-  const handleDeleteGoal = async (goalId: string) => {
-    if (window.confirm('Are you sure you want to delete this goal?')) {
-      try {
-        const goal = goals.find(g => g.id === goalId);
-        await deleteGoal(goalId);
-        if (goal) {
-          analyticsEvents.goalDeleted(goal.type);
-        }
-      } catch (error) {
-        console.error('Error deleting goal:', error);
-      }
-    }
+    navigate('/session');
   };
 
   const handleNavigate = (viewName: ViewType) => {
-    setEditGoal(null);
     setCurrentSession(null);
     const routeMap: Record<ViewType, string> = {
       dashboard: '/',
       goalSetup: '/goals',
-      editGoal: '/goals',
       sessionGenerator: '/session',
-      customizer: '/customizer',
       timer: '/timer',
       progressLogger: '/progress',
       profile: '/profile'
@@ -83,12 +62,6 @@ function AppContent() {
   };
 
   const handleGoalComplete = () => {
-    setEditGoal(null);
-    navigate('/goals');
-  };
-
-  const handleEditGoal = (goal: Goal) => {
-    setEditGoal(goal);
     navigate('/goals');
   };
 
@@ -97,7 +70,6 @@ function AppContent() {
       await logout();
       navigate('/');
       setCurrentSession(null);
-      setEditGoal(null);
     } catch (error) {
       console.error('Error logging out:', error);
     }
@@ -107,7 +79,7 @@ function AppContent() {
     return <Auth />;
   }
 
-  if (loading || practiceGoalsLoading) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="text-xl text-gray-600">Loading...</div>
@@ -151,18 +123,13 @@ function AppContent() {
           } />
 
           <Route path="/goals" element={
-            <GoalSetup
-              existingGoals={goals}
-              editGoal={editGoal}
+            <EnhancedGoalSetup
               onComplete={handleGoalComplete}
-              onEditGoal={handleEditGoal}
-              handleDeleteGoal={handleDeleteGoal}
             />
           } />
 
           <Route path="/session" element={
             <SessionGenerator
-              goals={goals}
               onSessionCreated={handleSessionCreated}
               onBack={() => navigate('/goals')}
             />
