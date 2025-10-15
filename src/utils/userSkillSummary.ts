@@ -3,12 +3,25 @@ import type {
   RepertoirePiece,
   ScaleSkill,
   EarTrainingSkills,
-  PracticeFocus
+  PracticeFocus,
+  PracticeGoal,
+  PracticeGoalType
 } from '../types';
 import { SCALES, INTERVALS, CHORDS } from '../data/skillsData';
 
+const GOAL_TYPE_LABELS: Record<PracticeGoalType, string> = {
+  performance: 'Performance/Recital',
+  specificPiece: 'Learning a Specific Piece',
+  exam: 'Exam/Audition',
+  sightReading: 'Improve Sight-Reading',
+  improvisation: 'Build Improvisation Skills',
+  general: 'General Skill Development',
+  other: 'Other'
+};
+
 interface UserSkillSummary {
-  practiceFocus: PracticeFocus;
+  practiceFocus: PracticeFocus; // DEPRECATED - kept for backwards compatibility
+  practiceGoal: PracticeGoal | null;
   newPiecesInProgress: {
     name: string;
     sections: number;
@@ -31,11 +44,12 @@ interface UserSkillSummary {
 }
 
 export const generateUserSkillSummary = (
-  practiceFocus: PracticeFocus,
+  practiceFocus: PracticeFocus, // DEPRECATED - kept for backwards compatibility
   newPieceGoals: NewPieceGoal[],
   repertoirePieces: RepertoirePiece[],
   scaleSkills: ScaleSkill[],
-  earTraining: EarTrainingSkills | null
+  earTraining: EarTrainingSkills | null,
+  practiceGoal: PracticeGoal | null = null
 ): UserSkillSummary => {
   // Process new pieces
   const newPiecesInProgress = newPieceGoals.map(goal => ({
@@ -72,7 +86,8 @@ export const generateUserSkillSummary = (
   const earTrainingAnalysis = analyzeEarTraining(earTraining);
 
   return {
-    practiceFocus,
+    practiceFocus, // DEPRECATED
+    practiceGoal,
     newPiecesInProgress,
     repertoire,
     scaleSkills: scaleSkillsAnalysis,
@@ -186,7 +201,30 @@ const analyzeEarTraining = (earTraining: EarTrainingSkills | null): { intervals:
 };
 
 export const formatSkillSummaryForLLM = (summary: UserSkillSummary): string => {
-  let prompt = `User's Practice Focus: ${summary.practiceFocus}\n\n`;
+  let prompt = '';
+
+  // Practice Goal Section (NEW - prioritized)
+  if (summary.practiceGoal) {
+    const goal = summary.practiceGoal;
+    const startDate = new Date(goal.startDate);
+    const endDate = new Date(goal.endDate);
+    const now = new Date();
+    const totalWeeks = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 7));
+    const weeksRemaining = Math.max(0, Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24 * 7)));
+
+    prompt += `Current Practice Goal:\n`;
+    prompt += `  Type: ${GOAL_TYPE_LABELS[goal.goalType]}\n`;
+    if (goal.specificDetails) {
+      prompt += `  Specific: ${goal.specificDetails}\n`;
+    }
+    prompt += `  Timeline: ${weeksRemaining} of ${totalWeeks} weeks remaining\n`;
+    prompt += `  Started: ${startDate.toLocaleDateString()}\n`;
+    prompt += `  Target End: ${endDate.toLocaleDateString()}\n\n`;
+    prompt += `IMPORTANT: Weight your practice session recommendations to support this goal.\n\n`;
+  } else {
+    // Fallback to old practice focus if no goal is set
+    prompt += `User's Practice Focus (Legacy): ${summary.practiceFocus}\n\n`;
+  }
 
   // New pieces section
   if (summary.newPiecesInProgress.length > 0) {
@@ -215,7 +253,7 @@ export const formatSkillSummaryForLLM = (summary: UserSkillSummary): string => {
         prompt += `- ${piece.name} (never reviewed)\n`;
       }
     });
-    prompt += `\nNote: Consider prioritizing pieces that haven't been reviewed recently to maintain the repertoire.\n\n`;
+    prompt += `\nNote: Prioritize pieces that haven't been reviewed recently to maintain the repertoire.\n\n`;
   }
 
   // Scale skills section

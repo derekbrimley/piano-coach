@@ -2,9 +2,13 @@ import { onRequest } from 'firebase-functions/v2/https';
 import { setGlobalOptions } from 'firebase-functions/v2';
 import Anthropic from '@anthropic-ai/sdk';
 import OpenAI from 'openai';
+import cors from 'cors';
 
 // Set global options
 setGlobalOptions({ maxInstances: 10 });
+
+// Initialize CORS with permissive settings for development
+const corsHandler = cors({ origin: true });
 
 // Configuration - set via Firebase environment config
 const LLM_PROVIDER = process.env.LLM_PROVIDER || 'claude';
@@ -132,44 +136,46 @@ const generateWithOpenAI = async (params) => {
 // HTTP Cloud Function
 export const generateSession = onRequest(
   {
-    cors: true,
     maxInstances: 10,
     timeoutSeconds: 60,
     memory: '256MiB'
   },
   async (req, res) => {
-    // Only allow POST requests
-    if (req.method !== 'POST') {
-      res.status(405).send('Method Not Allowed');
-      return;
-    }
-
-    try {
-      const { skillSummary, sessionLength } = req.body;
-
-      // Validate input
-      if (!skillSummary || !sessionLength) {
-        res.status(400).json({
-          error: 'Missing required parameters: skillSummary and sessionLength'
-        });
+    // Handle CORS
+    return corsHandler(req, res, async () => {
+      // Only allow POST requests
+      if (req.method !== 'POST') {
+        res.status(405).send('Method Not Allowed');
         return;
       }
 
-      // Generate session based on provider
-      let activities;
-      if (LLM_PROVIDER === 'claude') {
-        activities = await generateWithClaude({ skillSummary, sessionLength });
-      } else {
-        activities = await generateWithOpenAI({ skillSummary, sessionLength });
-      }
+      try {
+        const { skillSummary, sessionLength } = req.body;
 
-      res.status(200).json({ activities });
-    } catch (error) {
-      console.error('Error generating session:', error);
-      res.status(500).json({
-        error: 'Failed to generate session',
-        message: error.message
-      });
-    }
+        // Validate input
+        if (!skillSummary || !sessionLength) {
+          res.status(400).json({
+            error: 'Missing required parameters: skillSummary and sessionLength'
+          });
+          return;
+        }
+
+        // Generate session based on provider
+        let activities;
+        if (LLM_PROVIDER === 'claude') {
+          activities = await generateWithClaude({ skillSummary, sessionLength });
+        } else {
+          activities = await generateWithOpenAI({ skillSummary, sessionLength });
+        }
+
+        res.status(200).json({ activities });
+      } catch (error) {
+        console.error('Error generating session:', error);
+        res.status(500).json({
+          error: 'Failed to generate session',
+          message: error.message
+        });
+      }
+    });
   }
 );

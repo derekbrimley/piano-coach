@@ -175,7 +175,7 @@ export interface EarTrainingSkills {
   updatedAt: string;
 }
 
-// Practice Focus preference
+// Practice Focus preference (DEPRECATED - use PracticeGoal instead)
 export type PracticeFocus = 'newPieces' | 'technique' | 'earTraining' | 'expressivity';
 
 export interface UserPreferences {
@@ -183,5 +183,29 @@ export interface UserPreferences {
   userId: string;
   practiceFocus: PracticeFocus;
   defaultSessionLength?: number; // Default: 60 minutes
+  updatedAt: string;
+}
+
+// Practice Goal types (overall practice objective)
+export type PracticeGoalType =
+  | 'performance'
+  | 'specificPiece'
+  | 'exam'
+  | 'sightReading'
+  | 'improvisation'
+  | 'general'
+  | 'other';
+
+export type PracticeGoalStatus = 'active' | 'completed' | 'abandoned';
+
+export interface PracticeGoal {
+  id?: string;
+  userId: string;
+  goalType: PracticeGoalType;
+  specificDetails?: string; // Optional free-form description
+  startDate: string; // ISO date
+  endDate: string; // ISO date
+  status: PracticeGoalStatus;
+  createdAt: string;
   updatedAt: string;
 }
