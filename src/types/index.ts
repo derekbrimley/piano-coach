@@ -1,60 +1,4 @@
-// Goal types
-export type GoalType = 'newPiece' | 'technique' | 'listening' | 'repertoire';
-
-export interface BaseGoal {
-  id: string;
-  type: GoalType;
-  userId: string;
-  createdAt: string;
-  updatedAt?: string;
-  lastPracticed?: string;
-  sessionsCompleted?: number;
-}
-
-export interface LeadSheetProgress {
-  foundRecordings: boolean;
-  learnedChordProgression: boolean;
-  learnedMelody: boolean;
-  handsTogetherSlowly: boolean;
-  handsTogetherAtSpeed: boolean;
-  appliedJazzLanguage: boolean;
-}
-
-export interface NewPieceGoal extends BaseGoal {
-  type: 'newPiece';
-  name: string;
-  pieceType: 'traditional' | 'leadSheet';
-  sections?: number; // For traditional pieces
-  leadSheetProgress?: LeadSheetProgress; // For lead sheet pieces
-  currentProgress?: string;
-  challenges?: string;
-}
-
-export interface TechniqueGoal extends BaseGoal {
-  type: 'technique';
-  focus: string[];
-  details?: string;
-}
-
-export interface ListeningGoal extends BaseGoal {
-  type: 'listening';
-  skills: string[];
-  details?: string;
-}
-
-export interface RepertoirePieceData {
-  name: string;
-  addedAt?: string;
-  lastReviewed?: string;
-  practiceHistory?: { date: string }[];
-}
-
-export interface RepertoireGoal extends BaseGoal {
-  type: 'repertoire';
-  pieces: string[]; // Kept for backward compatibility
-}
-
-// New separate model for repertoire pieces
+// Repertoire pieces (separate from goals)
 export interface RepertoirePiece {
   id: string;
   userId: string;
@@ -64,22 +8,24 @@ export interface RepertoirePiece {
   practiceHistory?: { date: string }[];
 }
 
-export type Goal = NewPieceGoal | TechniqueGoal | ListeningGoal | RepertoireGoal;
-
 // Activity types
-export type ActivityType = 'warmup' | 'newPiece' | 'technique' | 'listening' | 'repertoire' | 'exercise';
+export type ActivityType = 'warmup' | 'technique' | 'repertoire' | 'exercise' | 'goal';
 
 export interface Activity {
   id: string;
   type: ActivityType;
-  goalId?: string;
   exerciseId?: string;
   pieceId?: string; // For repertoire pieces
+  practiceGoalId?: string; // For practice goal activities
   title: string;
   description: string;
   duration: number;
   suggestions?: string[];
-  achieved?: boolean;
+
+  // Enhanced tracking fields
+  completionType?: CompletionType; // 'completed' | 'progressed' | 'reviewed' | 'practiced'
+  quality?: number; // 1-5 stars
+  notes?: string; // Session-specific notes
 }
 
 // Exercise types
@@ -119,35 +65,6 @@ export interface Session {
   notes?: string;
 }
 
-// Form data types (before being saved to Firebase)
-export interface NewPieceFormData {
-  type: 'newPiece';
-  name: string;
-  pieceType: 'traditional' | 'leadSheet';
-  sections?: number;
-  leadSheetProgress?: LeadSheetProgress;
-  currentProgress?: string;
-  challenges?: string;
-}
-
-export interface TechniqueFormData {
-  type: 'technique';
-  focus: string[];
-  details?: string;
-}
-
-export interface ListeningFormData {
-  type: 'listening';
-  skills: string[];
-  details?: string;
-}
-
-export interface RepertoireFormData {
-  type: 'repertoire';
-  pieces: string[];
-}
-
-export type GoalFormData = NewPieceFormData | TechniqueFormData | ListeningFormData | RepertoireFormData;
 
 // Profile/Skill tracking types
 export interface ScaleSkill {
@@ -175,13 +92,9 @@ export interface EarTrainingSkills {
   updatedAt: string;
 }
 
-// Practice Focus preference (DEPRECATED - use PracticeGoal instead)
-export type PracticeFocus = 'newPieces' | 'technique' | 'earTraining' | 'expressivity';
-
 export interface UserPreferences {
   id?: string;
   userId: string;
-  practiceFocus: PracticeFocus;
   defaultSessionLength?: number; // Default: 60 minutes
   updatedAt: string;
 }
@@ -193,19 +106,184 @@ export type PracticeGoalType =
   | 'exam'
   | 'sightReading'
   | 'improvisation'
-  | 'general'
+  | 'earTrainingGoal'
+  | 'technique'
   | 'other';
 
 export type PracticeGoalStatus = 'active' | 'completed' | 'abandoned';
 
+export type CompletionType = 'completed' | 'progressed' | 'reviewed' | 'practiced';
+
+// Session quality rating
+export interface SessionActivityRating {
+  quality: number; // 1-5 stars
+  notes?: string;
+}
+
+// Performance/Recital Goal
+export type PerformanceReadiness = 'shaky' | 'solid' | 'performanceReady';
+
+export interface PerformancePiece {
+  name: string;
+  readiness: PerformanceReadiness;
+}
+
+export interface PerformanceGoalData {
+  eventDate: string; // ISO date
+  pieces: PerformancePiece[];
+  fullRunThroughs: number;
+  memoryConfidence: number; // 1-5 scale
+  pressurePracticeSessions: number;
+}
+
+// Specific Piece Goal
+export type LearningStage = 'handsSeparately' | 'handsTogether' | 'memory' | 'polish';
+
+export interface ProblemSpot {
+  id: string;
+  description: string;
+  status: 'identified' | 'working' | 'resolved';
+}
+
+export interface PieceSection {
+  id: string;
+  name: string;
+  learned: boolean;
+}
+
+export interface SpecificPieceGoalData {
+  pieceName: string;
+  composer?: string;
+  targetCompletionDate?: string; // ISO date
+  sections: PieceSection[];
+  currentBPM: number;
+  targetBPM: number;
+  learningStages: Record<LearningStage, boolean>;
+  problemSpots: ProblemSpot[];
+  daysWorked: number;
+}
+
+// Exam/Audition Goal
+export interface ExamRequirement {
+  id: string;
+  description: string;
+  completed: boolean;
+  confidenceRating: number; // 1-5
+}
+
+export interface MockExamAttempt {
+  date: string; // ISO date
+  notes?: string;
+}
+
+export interface ExamGoalData {
+  examDate: string; // ISO date
+  examLevel: string; // e.g., "ABRSM Grade 5", "College audition"
+  requiredPieces: string[];
+  technicalRequirements: ExamRequirement[];
+  mockExamAttempts: MockExamAttempt[];
+}
+
+// Sight-Reading Goal
+export type SightReadingLevel = 'beginner' | 'elementary' | 'intermediate' | 'advanced' | 'expert';
+export type FrequencyTarget = 'daily' | 'threeTimes' | 'weekly';
+
+export interface SightReadingSession {
+  date: string; // ISO date
+  accuracyRating: number; // 1-5
+}
+
+export interface SightReadingGoalData {
+  targetLevel: SightReadingLevel;
+  frequencyTarget: FrequencyTarget;
+  currentLevel: SightReadingLevel;
+  piecesRead: number;
+  sessions: SightReadingSession[];
+  consecutiveDays: number;
+}
+
+// Improvisation Goal
+export type ImprovisationStyle = 'jazz' | 'blues' | 'gospel' | 'classical' | 'other';
+
+export interface KeyProgression {
+  id: string;
+  description: string;
+  mastered: boolean;
+}
+
+export interface ImprovisationGoalData {
+  style: ImprovisationStyle;
+  specificFocus: string;
+  keysProgressions: KeyProgression[];
+  patternsLearned: number;
+  recordingSessions: number;
+  backingTrackPlayAlongs: number;
+}
+
+// Ear Training Goal
+export type EarTrainingSkillFocus = 'intervals' | 'chordQuality' | 'progressions' | 'melodies';
+
+export interface EarTrainingSession {
+  date: string; // ISO date
+  exercisesCompleted: number;
+  accuracyPercentage: number;
+}
+
+export interface EarTrainingGoalData {
+  skillFocus: EarTrainingSkillFocus[];
+  targetDescription: string;
+  currentLevel: string;
+  sessions: EarTrainingSession[];
+  consecutiveDays: number;
+}
+
+// Technique Goal (Master Technique)
+export interface TechniqueExercise {
+  id: string;
+  description: string;
+  completed: boolean;
+}
+
+export interface KeyPattern {
+  id: string;
+  description: string; // e.g., "C Major"
+  mastered: boolean;
+}
+
+export interface TechniqueGoalData {
+  specificTechnique: string; // e.g., "Scales in all major keys at 120 BPM"
+  technicalExerciseMethod?: string; // e.g., "Hanon", "Czerny"
+  keysPatterns: KeyPattern[];
+  startingBPM: number;
+  currentBPM: number;
+  targetBPM: number;
+  daysPracticed: number;
+  exercises: TechniqueExercise[];
+}
+
+// Union type for all goal-specific data
+export type GoalSpecificData =
+  | PerformanceGoalData
+  | SpecificPieceGoalData
+  | ExamGoalData
+  | SightReadingGoalData
+  | ImprovisationGoalData
+  | EarTrainingGoalData
+  | TechniqueGoalData;
+
+// Enhanced Practice Goal
 export interface PracticeGoal {
   id?: string;
   userId: string;
   goalType: PracticeGoalType;
+  title: string; // User-friendly title
   specificDetails?: string; // Optional free-form description
   startDate: string; // ISO date
   endDate: string; // ISO date
   status: PracticeGoalStatus;
   createdAt: string;
   updatedAt: string;
+
+  // Goal-specific tracking data
+  goalData?: GoalSpecificData;
 }

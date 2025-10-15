@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { generateSession, createActivityFromExercise } from '../utils/sessionGenerator';
+import { generateSessionFallback, createActivityFromExerciseFallback } from '../utils/sessionGeneratorFallback';
 import { generateSessionWithLLM } from '../services/claudeApi';
 import { generateUserSkillSummary, formatSkillSummaryForLLM } from '../utils/userSkillSummary';
 import { useAuth } from '../contexts/AuthContext';
@@ -10,7 +10,7 @@ import { useUserPreferences } from '../hooks/useUserPreferences';
 import { usePracticeGoal } from '../hooks/usePracticeGoal';
 import SessionStartMessage from './SessionStartMessage';
 import ExerciseSelector from './ExerciseSelector';
-import type { Activity, Exercise, Goal, Session, NewPieceGoal } from '../types';
+import type { Activity, Exercise, Session } from '../types';
 import { draggable, dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { autoScrollForElements } from '@atlaskit/pragmatic-drag-and-drop-auto-scroll/element';
 import { DropIndicator } from '@atlaskit/pragmatic-drag-and-drop-react-drop-indicator/box';
@@ -19,7 +19,6 @@ import { analyticsEvents } from '../utils/analytics';
 
 
 interface SessionGeneratorProps {
-  goals: Goal[];
   onSessionCreated: (session: Session) => void;
   onBack: () => void;
 }
@@ -33,7 +32,7 @@ interface CachedSession {
   userId: string;
 }
 
-const SessionGenerator: React.FC<SessionGeneratorProps> = ({ goals, onSessionCreated }) => {
+const SessionGenerator: React.FC<SessionGeneratorProps> = ({ onSessionCreated }) => {
   const { user } = useAuth();
   const { pieces: repertoire } = useRepertoire(user?.uid);
   const { scaleSkills } = useScaleSkills(user?.uid);
@@ -138,13 +137,8 @@ const SessionGenerator: React.FC<SessionGeneratorProps> = ({ goals, onSessionCre
       isGeneratingRef.current = true;
       setIsGenerating(true);
       try {
-        // Filter only newPiece goals
-        const newPieceGoals = goals.filter(g => g.type === 'newPiece') as NewPieceGoal[];
-
         // Generate skill summary with practice goals (use first active goal for now)
         const summary = generateUserSkillSummary(
-          preferences?.practiceFocus || 'newPieces',
-          newPieceGoals,
           repertoire,
           scaleSkills,
           earTraining,
@@ -175,7 +169,7 @@ const SessionGenerator: React.FC<SessionGeneratorProps> = ({ goals, onSessionCre
         console.error('LLM generation failed, using fallback:', error);
         // Only use fallback if not aborted
         if (!abortController.signal.aborted) {
-          const generated = generateSession(goals, repertoire, sessionLength);
+          const generated = generateSessionFallback(repertoire, sessionLength);
           setActivities(generated);
           analyticsEvents.sessionGenerated(sessionLength, generated.length);
         }
@@ -223,7 +217,7 @@ const SessionGenerator: React.FC<SessionGeneratorProps> = ({ goals, onSessionCre
   };
 
   const handleExerciseSelect = (exercise: Exercise) => {
-    const newActivity = createActivityFromExercise(exercise, activities.length);
+    const newActivity = createActivityFromExerciseFallback(exercise, activities.length);
 
     if (replacingIndex !== null) {
       // Replace existing activity

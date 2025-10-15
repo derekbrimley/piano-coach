@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useSessions } from '../hooks/useSessions';
-import { useGoals } from '../hooks/useGoals';
 import { useRepertoire } from '../hooks/useRepertoire';
 import { Session } from '../types';
 
@@ -13,7 +12,6 @@ interface ProgressLoggerProps {
 const ProgressLogger = ({ session, onComplete }: ProgressLoggerProps) => {
   const { user } = useAuth();
   const { addSession } = useSessions(user?.uid);
-  const { updateGoal } = useGoals(user?.uid);
   const { markAsReviewed } = useRepertoire(user?.uid);
   const [activityProgress, setActivityProgress] = useState<Record<string, boolean>>({});
   const [notes, setNotes] = useState('');
@@ -39,24 +37,6 @@ const ProgressLogger = ({ session, onComplete }: ProgressLoggerProps) => {
         totalDuration: session.totalDuration,
         completedAt: new Date().toISOString()
       });
-
-      // Update goal progress based on achievements
-      const goalUpdates: Record<string, { lastPracticed: string; sessionsCompleted: number }> = {};
-      session.activities.forEach(activity => {
-        if (activity.goalId && activityProgress[activity.id]) {
-          if (!goalUpdates[activity.goalId]) {
-            goalUpdates[activity.goalId] = {
-              lastPracticed: new Date().toISOString(),
-              sessionsCompleted: 1
-            };
-          }
-        }
-      });
-
-      // Update each goal
-      for (const [goalId, updates] of Object.entries(goalUpdates)) {
-        await updateGoal(goalId, updates as Partial<any>);
-      }
 
       // Mark repertoire pieces as reviewed when practiced
       const repertoirePiecesToUpdate = session.activities.filter(
