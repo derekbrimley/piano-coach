@@ -38,7 +38,12 @@ Please generate a practice session with ${Math.round(params.sessionLength / 15)}
 - Type: one of "warmup", "newPiece", "technique", "listening", "repertoire", or "exercise"
 - Suggestions: 2-3 specific practice suggestions for that activity
 
-IMPORTANT: When including repertoire review activities, prioritize pieces that haven't been reviewed recently (higher "days ago" values). The repertoire list is already sorted with least recently reviewed pieces first.
+CRITICAL INSTRUCTIONS FOR REPERTOIRE:
+- IF the user has learned pieces (Repertoire section exists), you MUST include at least 1-2 "repertoire" type activities in the session
+- When creating repertoire activities, prioritize pieces that haven't been reviewed recently (look for "never reviewed" or high "days ago" values)
+- Name the specific piece(s) in the activity title and description
+- For example: "Review Moonlight Sonata - 1st Movement" or "Practice Chopin Nocturne Op. 9 No. 2"
+- This is essential for maintaining the user's learned repertoire
 
 Respond ONLY with a valid JSON array in this exact format:
 [
