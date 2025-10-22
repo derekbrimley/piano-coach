@@ -88,7 +88,7 @@ const selectGenericExercises = (count: number): Exercise[] => {
     if (exercisesInCategory.length > 0) {
       // Pick a random exercise from this category
       const randomIndex = Math.floor(Math.random() * exercisesInCategory.length);
-      selected.push(exercisesInCategory[randomIndex]);
+      selected.push(exercisesInCategory[randomIndex]!);
     }
   });
 
