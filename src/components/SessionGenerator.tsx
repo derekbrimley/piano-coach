@@ -242,20 +242,23 @@ const SessionGenerator: React.FC<SessionGeneratorProps> = ({ onSessionCreated })
     const newActivities = [...activities];
     const [movedItem] = newActivities.splice(sourceIndex, 1);
 
-    // Adjust destination index based on edge
-    let targetIndex = destinationIndex;
-    if (edge === 'bottom') {
-      targetIndex = destinationIndex + 1;
-    }
-    if (sourceIndex < destinationIndex && edge === 'bottom') {
-      targetIndex = destinationIndex;
-    }
-    if (sourceIndex < destinationIndex && edge === 'top') {
-      targetIndex = destinationIndex - 1;
-    }
+    if(movedItem) {
 
-    newActivities.splice(targetIndex, 0, movedItem);
-    setActivities(newActivities);
+      // Adjust destination index based on edge
+      let targetIndex = destinationIndex;
+      if (edge === 'bottom') {
+        targetIndex = destinationIndex + 1;
+      }
+      if (sourceIndex < destinationIndex && edge === 'bottom') {
+        targetIndex = destinationIndex;
+      }
+      if (sourceIndex < destinationIndex && edge === 'top') {
+        targetIndex = destinationIndex - 1;
+      }
+  
+      newActivities.splice(targetIndex, 0, movedItem);
+      setActivities(newActivities);
+    }
   };
 
   const totalTime = activities.reduce((sum, a) => sum + a.duration, 0);

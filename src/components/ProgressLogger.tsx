@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useSessions } from '../hooks/useSessions';
 import { useRepertoire } from '../hooks/useRepertoire';
-import { Session } from '../types';
+import type { Session } from '../types';
 
 interface ProgressLoggerProps {
   session: Session;

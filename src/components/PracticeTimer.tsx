@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Session } from '../types';
+import type { Session } from '../types';
 import { analyticsEvents } from '../utils/analytics';
 
 interface PracticeTimerProps {
@@ -9,8 +9,9 @@ interface PracticeTimerProps {
 }
 
 const PracticeTimer = ({ session, onComplete, onExit }: PracticeTimerProps) => {
+  const sessionActivityDuration = session.activities[0] && session.activities[0].duration * 60 || 0;
   const [currentActivityIndex, setCurrentActivityIndex] = useState(0);
-  const [timeRemaining, setTimeRemaining] = useState(session.activities[0]?.duration * 60 || 0);
+  const [timeRemaining, setTimeRemaining] = useState(sessionActivityDuration);
   const [isRunning, setIsRunning] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [activityCompleted, setActivityCompleted] = useState(false);
@@ -53,8 +54,9 @@ const PracticeTimer = ({ session, onComplete, onExit }: PracticeTimerProps) => {
 
     if (currentActivityIndex < totalActivities - 1) {
       const nextIndex = currentActivityIndex + 1;
+      const sessionActivityDuration = session.activities[nextIndex] && session.activities[nextIndex].duration * 60 || 0;
       setCurrentActivityIndex(nextIndex);
-      setTimeRemaining(session.activities[nextIndex].duration * 60);
+      setTimeRemaining(sessionActivityDuration);
       setActivityCompleted(false);
       setIsRunning(false);
       setIsPaused(false);
