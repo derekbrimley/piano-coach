@@ -16,7 +16,7 @@ const claudeApiKey = process.env.ANTHROPIC_API_KEY;
 const openaiApiKey = process.env.OPENAI_API_KEY;
 
 // Models
-const claudeModel = 'claude-3-5-haiku-latest';
+const claudeModel = 'claude-haiku-4-5-20251001';
 const openaiModel = 'gpt-4o-mini';
 
 // Initialize clients

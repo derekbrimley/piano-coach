@@ -313,10 +313,6 @@ const Dashboard: React.FC<DashboardProps> = ({ numGoals, onNewSession, onManageG
                         {session.totalDuration} minutes
                       </Typography>
                     </Box>
-                    <Chip size="sm" variant="soft" color="primary">
-                      {session.activities?.filter(a => a.achieved).length || 0} /{' '}
-                      {session.activities?.length || 0} completed
-                    </Chip>
                   </Stack>
                   {session.notes && (
                     <Typography level="body-sm" sx={{ mt: 2, fontStyle: 'italic', color: 'text.secondary' }}>
