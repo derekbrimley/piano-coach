@@ -69,10 +69,27 @@ export const usePracticeGoal = (userId: string | undefined): UsePracticeGoalRetu
     const unsubscribe = onSnapshot(
       q,
       (snapshot) => {
-        const goals: PracticeGoal[] = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        } as PracticeGoal));
+        const goals: PracticeGoal[] = snapshot.docs.map(doc => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            ...data,
+            // Ensure title is always set, fallback to GOAL_TYPE_LABELS
+            title: data.title || (() => {
+              const GOAL_TYPE_LABELS: Record<string, string> = {
+                performance: 'Performance/Recital',
+                specificPiece: 'Learning a Specific Piece',
+                exam: 'Exam/Audition',
+                sightReading: 'Improve Sight-Reading',
+                improvisation: 'Build Improvisation Skills',
+                earTrainingGoal: 'Ear Training',
+                technique: 'Master Technique',
+                other: 'Other'
+              };
+              return GOAL_TYPE_LABELS[data.goalType] || 'Untitled Goal';
+            })()
+          } as PracticeGoal;
+        });
 
         // Sort in memory instead of using Firestore orderBy (avoids index requirement)
         const sortedGoals = goals.sort((a, b) =>

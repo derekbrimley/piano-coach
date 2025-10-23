@@ -137,12 +137,12 @@ const SessionGenerator: React.FC<SessionGeneratorProps> = ({ onSessionCreated })
       isGeneratingRef.current = true;
       setIsGenerating(true);
       try {
-        // Generate skill summary with practice goals (use first active goal for now)
+        // Generate skill summary with all practice goals
         const summary = generateUserSkillSummary(
           repertoire,
           scaleSkills,
           earTraining,
-          practiceGoals[0] || null
+          practiceGoals
         );
 
         const skillSummary = formatSkillSummaryForLLM(summary);

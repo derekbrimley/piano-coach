@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, where, orderBy, arrayUnion } from 'firebase/firestore';
 import { db } from '../firebase';
-import type { RepertoirePiece, RepertoirePieceData } from '../types';
+import type { RepertoirePiece } from '../types';
 
 interface UseRepertoireReturn {
   pieces: RepertoirePiece[];
   loading: boolean;
-  addPiece: (pieceData: RepertoirePieceData) => Promise<string>;
-  updatePiece: (pieceId: string, updates: Partial<RepertoirePieceData>) => Promise<void>;
+  addPiece: (pieceData: RepertoirePiece) => Promise<string>;
+  updatePiece: (pieceId: string, updates: Partial<RepertoirePiece>) => Promise<void>;
   deletePiece: (pieceId: string) => Promise<void>;
   markAsReviewed: (pieceId: string) => Promise<void>;
 }
@@ -40,7 +40,7 @@ export const useRepertoire = (userId: string | undefined): UseRepertoireReturn =
     return () => unsubscribe();
   }, [userId]);
 
-  const addPiece = async (pieceData: RepertoirePieceData): Promise<string> => {
+  const addPiece = async (pieceData: RepertoirePiece): Promise<string> => {
     if (!userId) {
       throw new Error('User must be authenticated to add repertoire pieces');
     }
@@ -58,7 +58,7 @@ export const useRepertoire = (userId: string | undefined): UseRepertoireReturn =
     }
   };
 
-  const updatePiece = async (pieceId: string, updates: Partial<RepertoirePieceData>): Promise<void> => {
+  const updatePiece = async (pieceId: string, updates: Partial<RepertoirePiece>): Promise<void> => {
     try {
       const pieceRef = doc(db, 'repertoire', pieceId);
       await updateDoc(pieceRef, updates);

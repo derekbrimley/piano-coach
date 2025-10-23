@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { collection, doc, setDoc, onSnapshot, query, where } from 'firebase/firestore';
+import { collection, doc, setDoc, onSnapshot, query, where, type DocumentData } from 'firebase/firestore';
 import { db } from '../firebase';
 import type { EarTrainingSkills } from '../types';
 
@@ -27,9 +27,10 @@ export const useEarTraining = (userId: string | undefined): UseEarTrainingReturn
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
       if (snapshot.docs.length > 0) {
-        const data = snapshot.docs[0].data();
+        const doc = snapshot.docs[0] as DocumentData;
+        const data = doc.data();
         setEarTraining({
-          id: snapshot.docs[0].id,
+          id: doc.id,
           ...data
         } as EarTrainingSkills);
       } else {
