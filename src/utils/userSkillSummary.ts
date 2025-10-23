@@ -19,7 +19,7 @@ const GOAL_TYPE_LABELS: Record<PracticeGoalType, string> = {
 };
 
 interface UserSkillSummary {
-  practiceGoal: PracticeGoal | null;
+  practiceGoals: PracticeGoal[];
   repertoire: {
     name: string;
     lastReviewed?: string;
@@ -39,7 +39,7 @@ export const generateUserSkillSummary = (
   repertoirePieces: RepertoirePiece[],
   scaleSkills: ScaleSkill[],
   earTraining: EarTrainingSkills | null,
-  practiceGoal: PracticeGoal | null = null
+  practiceGoals: PracticeGoal[] = []
 ): UserSkillSummary => {
 
   // Process repertoire with practice history
@@ -69,7 +69,7 @@ export const generateUserSkillSummary = (
   const earTrainingAnalysis = analyzeEarTraining(earTraining);
 
   return {
-    practiceGoal,
+    practiceGoals,
     repertoire,
     scaleSkills: scaleSkillsAnalysis,
     earTraining: earTrainingAnalysis
@@ -184,27 +184,30 @@ const analyzeEarTraining = (earTraining: EarTrainingSkills | null): { intervals:
 export const formatSkillSummaryForLLM = (summary: UserSkillSummary): string => {
   let prompt = '';
 
-  // Practice Goal Section
-  if (summary.practiceGoal) {
-    const goal = summary.practiceGoal;
-    const startDate = new Date(goal.startDate);
-    const endDate = new Date(goal.endDate);
-    const now = new Date();
-    const totalWeeks = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 7));
-    const weeksRemaining = Math.max(0, Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24 * 7)));
+  // Practice Goals Section
+  if (summary.practiceGoals.length > 0) {
+    prompt += `Active Practice Goals:\n`;
+    summary.practiceGoals.forEach((goal, index) => {
+      const startDate = new Date(goal.startDate);
+      const endDate = new Date(goal.endDate);
+      const now = new Date();
+      const totalWeeks = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 7));
+      const weeksRemaining = Math.max(0, Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24 * 7)));
 
-    prompt += `Current Practice Goal:\n`;
-    prompt += `  Title: ${goal.title}\n`;
-    prompt += `  Type: ${GOAL_TYPE_LABELS[goal.goalType]}\n`;
-    if (goal.specificDetails) {
-      prompt += `  Details: ${goal.specificDetails}\n`;
-    }
-    prompt += `  Timeline: ${weeksRemaining} of ${totalWeeks} weeks remaining\n`;
-    prompt += `  Started: ${startDate.toLocaleDateString()}\n`;
-    prompt += `  Target End: ${endDate.toLocaleDateString()}\n\n`;
-    prompt += `IMPORTANT: Weight your practice session recommendations to support this goal.\n\n`;
+      // Use title if available, otherwise use goal type label
+      const goalTitle = goal.title || GOAL_TYPE_LABELS[goal.goalType];
+      prompt += `\n${index + 1}. ${goalTitle}\n`;
+      prompt += `   Type: ${GOAL_TYPE_LABELS[goal.goalType]}\n`;
+      if (goal.specificDetails) {
+        prompt += `   Details: ${goal.specificDetails}\n`;
+      }
+      prompt += `   Timeline: ${weeksRemaining} of ${totalWeeks} weeks remaining\n`;
+      prompt += `   Started: ${startDate.toLocaleDateString()}\n`;
+      prompt += `   Target End: ${endDate.toLocaleDateString()}\n`;
+    });
+    prompt += `\nIMPORTANT: Weight your practice session recommendations to support ALL these goals.\n\n`;
   } else {
-    prompt += `No specific practice goal set.\n\n`;
+    prompt += `No specific practice goals set.\n\n`;
   }
 
   // Repertoire section with practice history

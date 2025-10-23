@@ -11,7 +11,8 @@ const GOAL_TYPE_LABELS: Record<PracticeGoalType, string> = {
   exam: 'Exam/Audition',
   sightReading: 'Improve Sight-Reading',
   improvisation: 'Build Improvisation Skills',
-  general: 'General Skill Development',
+  earTrainingGoal: 'Ear Training',
+  technique: 'Master Technique',
   other: 'Other'
 };
 

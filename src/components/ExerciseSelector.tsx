@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { EXERCISE_LIBRARY, EXERCISE_CATEGORIES } from '../data/exerciseLibrary';
 import type { Exercise } from '../types';
+import { CustomExerciseForm } from './CustomExerciseForm';
 
 interface ExerciseSelectorProps {
   onSelect: (exercise: Exercise) => void;
@@ -10,6 +11,7 @@ interface ExerciseSelectorProps {
 const ExerciseSelector: React.FC<ExerciseSelectorProps> = ({ onSelect, onClose }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [showCustomForm, setShowCustomForm] = useState(false);
 
   const filteredExercises = useMemo(() => {
     return EXERCISE_LIBRARY.filter(exercise => {
@@ -28,16 +30,22 @@ const ExerciseSelector: React.FC<ExerciseSelectorProps> = ({ onSelect, onClose }
     const grouped: Record<string, Exercise[]> = {};
 
     filteredExercises.forEach(exercise => {
-      if (!grouped[exercise.category]) {
-        grouped[exercise.category] = [];
+      const category = exercise.category as string;
+      if (!grouped[category]) {
+        grouped[category] = [];
       }
-      grouped[exercise.category].push(exercise);
+      grouped[category].push(exercise);
     });
 
     return grouped;
   }, [filteredExercises]);
 
   const handleExerciseClick = (exercise: Exercise) => {
+    onSelect(exercise);
+    onClose();
+  };
+
+  const handleCreateCustomExercise = (exercise: Exercise) => {
     onSelect(exercise);
     onClose();
   };
@@ -65,14 +73,23 @@ const ExerciseSelector: React.FC<ExerciseSelectorProps> = ({ onSelect, onClose }
             </button>
           </div>
 
-          {/* Search */}
-          <input
-            type="text"
-            placeholder="Search exercises..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-4"
-          />
+          {/* Search and Add Custom Exercise */}
+          <div className="flex gap-2 mb-4">
+            <input
+              type="text"
+              placeholder="Search exercises..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+            <button
+              onClick={() => setShowCustomForm(true)}
+              className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition font-medium whitespace-nowrap"
+              title="Create a custom exercise"
+            >
+              + Add Custom
+            </button>
+          </div>
 
           {/* Category Filter */}
           <div className="flex flex-wrap gap-2">
@@ -135,6 +152,13 @@ const ExerciseSelector: React.FC<ExerciseSelectorProps> = ({ onSelect, onClose }
             </div>
           )}
         </div>
+
+        {/* Custom Exercise Form Modal */}
+        <CustomExerciseForm
+          open={showCustomForm}
+          onClose={() => setShowCustomForm(false)}
+          onSubmit={handleCreateCustomExercise}
+        />
       </div>
     </div>
   );
